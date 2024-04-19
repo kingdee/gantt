@@ -1,0 +1,119 @@
+.calendarBottomText {
+  text-anchor: middle;
+  fill: #333;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  pointer-events: none;
+  
+  width: 44px;
+  height: 44px;
+}
+
+.calendarBottomText_day {
+  fill: #212121;
+  font-weight: 600;
+}
+
+.calendarBottomText_weekday {
+  fill: #666666;
+  font-size: 12px;
+}
+
+.calendarBottomText_today {
+  fill: #FF5F1F;
+}
+
+.calendarTopTick {
+  stroke: #d9d9d9;
+}
+
+.calendarTopText {
+  font-weight: 600;
+  padding-left: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.calendarHeader {
+  display: flex;
+  flex-direction: column;
+  background-color: #fafafa;
+  /* fill: #fafafa;
+  stroke: #d9d9d9;
+  stroke-width: 1; */
+}
+
+.calendarHeader_top, .calendarHeader_bottom {
+  display: flex;
+  height: 44px;
+  border-bottom: 1px solid #d9d9d9; 
+  box-sizing: border-box;
+}
+
+/* .calendarHeader_bottom {
+  display: flex;
+  height: 44px;
+  border-bottom: 1px solid #d9d9d9;
+  box-sizing: border-box;
+} */
+
+.calendarHeader_bottom_item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #212121;
+  font-size: 14px;
+  font-weight: 600;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.calendarHeader_bottom_item_text {
+  font-weight: 600;
+}
+
+.calendarHeader_bottom_item_vertical {
+  flex-direction: column;
+}
+
+.calendarHeader_bottom_item_vertical_top {
+  font-weight: 600;
+}
+
+.calendarHeader_bottom_item_active {
+  color: #FF5F1F !important;
+}
+
+.calendarHeader_bottom_item_active > .calendarHeader_bottom_item_sub {
+  color: #FF5F1F !important;
+}
+
+.calendarHeader_bottom_item_sub {
+  font-weight: 400;
+  color: #666666;
+  font-size: 12px;
+}
+
+.calendarHeader_bottom_item:not(:first-child) {
+  border-left: 1px solid #d9d9d9;
+}
+
+.calendarTop {
+  display: flex;
+  align-items: center;
+  /* padding-left: 12px; */
+  color: #212121;
+  font-size: 14px;
+  font-weight: 600;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.calendarTop:not(:first-child) {
+  border-left: 1px solid #d9d9d9;
+}

@@ -1,0 +1,29 @@
+.taskList {
+  color: #212121;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #d9d9d9;
+  overflow-x: hidden;
+  position: relative;
+  overflow-y: hidden;
+  min-width: 240px;
+  max-width: 60%;
+  flex-shrink: 0;
+}
+
+/* .taskList::-webkit-scrollbar-vertical {  
+  display: none;
+}
+
+.taskList::-webkit-scrollbar {  
+  width: 10px;
+}  
+
+.taskList::-webkit-scrollbar-vertical {  
+  display: none; 
+}  
+
+.taskList {  
+  scrollbar-width: thin; 
+  scrollbar-color: transparent transparent;
+} */

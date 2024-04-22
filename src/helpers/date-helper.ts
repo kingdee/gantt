@@ -493,8 +493,12 @@ export const getDateIsActive = (date: Date, viewMode: ViewMode): boolean => {
   } else if (viewMode === ViewMode.Week) {
     const oneWeekTime = 604800000 // 一周的毫秒数 60 * 60 * 24 * 1000 * 7
 
-    // 拿当周开始的时间比较，当前的时间 - 当周开始的时候小于一周的毫秒数的时候，那么就认为当前时间在当周内 
-    return ((+date) < (+nowStartDate)) && ((+nowStartDate) - (+date) <= oneWeekTime)
+    // 拿当前的时间比较，当前的时间 - 当周开始的时候小于一周的毫秒数的时候，那么就认为当前时间在当周内 
+    if((+date) < (+now)) {
+      return ((+now) - (+date) < oneWeekTime)
+    }
+
+    return false
   } else {
     return +nowStartDate === +date
   }

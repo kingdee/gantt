@@ -1,17 +1,9 @@
 {
-  "name": "gantt-task-react",
-  "version": "0.3.9",
-  "description": "Interactive Gantt Chart for React with TypeScript.",
-  "author": "MaTeMaTuK <maksym.vikarii@gmail.com>",
-  "homepage": "https://github.com/MaTeMaTuK/gantt-task-react",
-  "license": "MIT",
-  "repository": "MaTeMaTuK/gantt-task-react",
-  "main": "dist/index.js",
-  "module": "dist/index.modern.js",
-  "source": "src/index.tsx",
-  "engines": {
-    "node": ">=10"
-  },
+  "name": "@kdcloudjs/gantt",
+  "version": "0.0.1",
+  "description": "金蝶 react gantt 组件",
+  "license": "Apache-2.0",
+  "title": "gantt",
   "keywords": [
     "react",
     "gantt",
@@ -22,6 +14,17 @@
     "gantt chart",
     "react-gantt",
     "task"
+  ],
+  "homepage": "https://react.kingdee.design/",
+  "repository": "kingdee/gantt",
+  "main": "dist/index.js",
+  "module": "dist/index.modern.js",
+  "source": "src/index.tsx",
+  "engines": {
+    "node": ">=10"
+  },
+  "contributors": [
+    "kingdee"
   ],
   "scripts": {
     "build": "microbundle-crl --compress --format modern,cjs",

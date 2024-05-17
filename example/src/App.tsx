@@ -1,8 +1,8 @@
 import React from "react";
-import { Task, ViewMode, Gantt } from "gantt-task-react";
+import { Task, ViewMode, Gantt } from "@kdcloudjs/gantt";
 import { ViewSwitcher } from "./components/view-switcher";
 import { getStartEndDateForProject, initTasks, columns1 } from "./helper";
-import "gantt-task-react/dist/index.css";
+import "@kdcloudjs/gantt/dist/index.css";
 
 // Init
 const App = () => {

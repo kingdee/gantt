@@ -67,7 +67,8 @@ export const Calendar: React.FC<CalendarProps> = ({
   const getCalendarValuesForQuarterYear = () => {
     const topValues: ReactChild[] = [];
     const bottomValues: ReactChild[] = [];
-    let yearColumnWidth = 0
+    // 用于存放年以及对应的宽度
+    const yearWidthData = {}
     for (let i = 0; i < dateSetup.dates.length; i++) {
       const date = dateSetup.dates[i];
       // const bottomValue = getLocaleMonth(date, locale);
@@ -75,9 +76,16 @@ export const Calendar: React.FC<CalendarProps> = ({
 
       const isActive = getDateIsActive(date, viewMode)
       
+      const topValue = getLocaleYear(dateSetup.dates[i], locale)
       const quarterYearWidth = getDateColumnWidthByViewMode(viewMode, date)
-      yearColumnWidth = yearColumnWidth + quarterYearWidth
 
+      // 计算年占的宽度
+      if(yearWidthData[topValue]) {
+        yearWidthData[topValue] = yearWidthData[topValue] + quarterYearWidth
+      } else {
+        yearWidthData[topValue] = quarterYearWidth
+      }
+      
       bottomValues.push(
         <div
           key={date.getTime()}
@@ -89,37 +97,40 @@ export const Calendar: React.FC<CalendarProps> = ({
           {quarter}
         </div>
       );
-      if (
-        i === 0 ||
-        date.getFullYear() !== dateSetup.dates[i - 1].getFullYear()
-      ) {
-        const topValue = getLocaleYear(date, locale)
+    }
 
+    Object.keys(yearWidthData).forEach(key => {
         topValues.push(
           <TopPartOfCalendar
-            key={topValue}
-            value={topValue}
-            width={yearColumnWidth}
+            key={key}
+            value={key}
+            width={yearWidthData[key]}
           />
         );
-        yearColumnWidth = 0
-      }
-    }
+    })
     return [topValues, bottomValues];
   };
 
   const getCalendarValuesForMonth = () => {
     const topValues: ReactChild[] = [];
     const bottomValues: ReactChild[] = [];
-    // const topDefaultHeight = headerHeight * 0.35;
+    // 用于存放年以及对应的宽度
+    const yearWidthData = {}
     const dates = dateSetup.dates;
-    let preRecordI = 0
     for (let i = 0; i < dates.length; i++) {
       const date = dates[i];
       const bottomValue = getLocaleMonth(date, locale);
 
+      const topValue = getLocaleYear(date, locale)
       const isActive = getDateIsActive(date, viewMode)
       const monthColumnWidth = getMonthColumnWidth(viewMode, date)
+
+      // 计算年占的宽度
+      if(yearWidthData[topValue]) {
+        yearWidthData[topValue] = yearWidthData[topValue] + monthColumnWidth
+      } else {
+        yearWidthData[topValue] = monthColumnWidth
+      }
       
       bottomValues.push(
         <div
@@ -134,29 +145,18 @@ export const Calendar: React.FC<CalendarProps> = ({
           </div>
         </div>  
       );
-
-      if (
-        i === dates.length -1 ||
-        date.getFullYear() !== dates[i + 1]?.getFullYear()
-      ) {
-        const topValue = getLocaleYear(date, locale)
-        
-        const curYearDates = dates.slice(preRecordI === 0 ? preRecordI : (preRecordI + 1), i+1)
-        const yearWidth = curYearDates.reduce((preCount, cur) => {
-          return preCount + getMonthColumnWidth(viewMode, cur)
-        }, 0)
-        console.log('yearWidth', yearWidth, curYearDates, preRecordI, dates)
-        preRecordI = i
-
-        topValues.push(
-          <TopPartOfCalendar
-            key={topValue}
-            value={topValue}
-            width={yearWidth}
-          />
-        );
-      }
     }
+
+    Object.keys(yearWidthData).forEach(key => {
+      topValues.push(
+        <TopPartOfCalendar
+          key={key}
+          value={key}
+          width={yearWidthData[key]}
+        />
+      );
+    })
+
     return [topValues, bottomValues];
   };
 

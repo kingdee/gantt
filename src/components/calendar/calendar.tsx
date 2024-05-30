@@ -165,6 +165,7 @@ export const Calendar: React.FC<CalendarProps> = ({
     let weeksCount: number = 1;
     // const topDefaultHeight = headerHeight * 0.35;
     const dates = dateSetup.dates;
+
     for (let i = dates.length - 1; i >= 0; i--) {
       const date = dates[i];
       let topValue = "";
@@ -195,11 +196,19 @@ export const Calendar: React.FC<CalendarProps> = ({
         if (i !== dates.length - 1) {
           // console.log('week', date, weeksCount)
           let percent = 1
+          // 不足四周的时候需要计算占比（拿当月最大的那天减去当月开始的那天）
           if(weeksCount < 4) {
             const nextMonthFirstDay = startOfDate(addToDate(date, 1, 'month'), 'month')
             const curMonthFirstDay = startOfDate(addToDate(date, 0, 'month'), 'month')
 
-            percent = (nextMonthFirstDay.getTime() - date.getTime()) / (nextMonthFirstDay.getTime() - curMonthFirstDay.getTime())
+            const curWeekMaxDate = addToDate(date, 7 * weeksCount - 1, "day")
+
+            // 需要计算占比
+            if(curWeekMaxDate.getMonth() === date.getMonth()) {
+              percent = (curWeekMaxDate.getTime() - date.getTime()) / (nextMonthFirstDay.getTime() - curMonthFirstDay.getTime())
+            } else {
+              percent = (nextMonthFirstDay.getTime() - date.getTime()) / (nextMonthFirstDay.getTime() - curMonthFirstDay.getTime())
+            }
           }
           topValues.unshift(
             <TopPartOfCalendar

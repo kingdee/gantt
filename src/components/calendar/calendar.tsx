@@ -10,7 +10,8 @@ import {
   getLocaleYear,
   getYearColumnWidth,
   startOfDate, getMonthColumnWidth, getDateColumnWidthByViewMode, addToDate,
-  formatDate, getDateIsActive
+  formatDate, getDateIsActive,
+  getTopValueByDate
 } from "../../helpers/date-helper";
 import { DateSetup } from "../../types/date-setup";
 import classnames from 'classnames'
@@ -25,6 +26,21 @@ export type CalendarProps = {
   columnWidth: number;
   svgWidth: number;
 };
+
+// 根据遍历下级的得到的每项宽度映射，生成顶部时间轴
+export const getTopValuesByMap = (topWidthMap: Object) => {
+  const topValues: Array<ReactChild> = []
+  for (const key in topWidthMap) {
+    topValues.push(
+      <TopPartOfCalendar
+          key={key}
+          value={key}
+          width={topWidthMap[key]}
+        />
+    )
+  }
+  return topValues
+}
 
 export const Calendar: React.FC<CalendarProps> = ({
   dateSetup,
@@ -65,7 +81,6 @@ export const Calendar: React.FC<CalendarProps> = ({
   };
 
   const getCalendarValuesForQuarterYear = () => {
-    const topValues: ReactChild[] = [];
     const bottomValues: ReactChild[] = [];
     const topWidthMap = {}
     for (let i = 0; i < dateSetup.dates.length; i++) {
@@ -97,20 +112,10 @@ export const Calendar: React.FC<CalendarProps> = ({
       )
     }
     
-    for (const key in topWidthMap) {
-      topValues.push(
-        <TopPartOfCalendar
-          key={key}
-          value={key}
-          width={topWidthMap[key]}
-        />
-      )
-    }
-    return [topValues, bottomValues];
+    return [getTopValuesByMap(topWidthMap), bottomValues];
   };
 
   const getCalendarValuesForMonth = () => {
-    const topValues: ReactChild[] = [];
     const bottomValues: ReactChild[] = [];
     const topWidthMap = {}
 
@@ -147,16 +152,7 @@ export const Calendar: React.FC<CalendarProps> = ({
       )
     }
 
-    for (const key in topWidthMap) {
-      topValues.push(
-        <TopPartOfCalendar
-          key={key}
-          value={key}
-          width={topWidthMap[key]}
-        />
-      )
-    }
-    return [topValues, bottomValues];
+    return [getTopValuesByMap(topWidthMap), bottomValues];
   };
 
   const getCalendarValuesForWeek = () => {
@@ -226,10 +222,11 @@ export const Calendar: React.FC<CalendarProps> = ({
   };
 
   const getCalendarValuesForDay = () => {
-    const topValues: ReactChild[] = [];
     const bottomValues: ReactChild[] = [];
+    const topWidthMap = {}
+
     const dates = dateSetup.dates;
-    let dayCount = 1
+    // let dayCount = 1
     for (let i = 0; i < dates.length; i++) {
       const date = dates[i];
 
@@ -238,6 +235,7 @@ export const Calendar: React.FC<CalendarProps> = ({
       const paddedDay = (day < 10 ? '0' : '') + day;  
 
       const isActive = getDateIsActive(date, viewMode)
+      const bottomWidth = getDateColumnWidthByViewMode(viewMode, date)
 
       bottomValues.push(
         <div
@@ -245,37 +243,29 @@ export const Calendar: React.FC<CalendarProps> = ({
           className={classnames(styles.calendarHeader_bottom_item, styles.calendarHeader_bottom_item_vertical, {
             [styles.calendarHeader_bottom_item_active]: isActive
           })}
-          style={{ width: getDateColumnWidthByViewMode(viewMode, date), height: 44, left: columnWidth * i, top: headerHeight * 0.5 - 1 }}
+          style={{ width: bottomWidth, height: 44, left: columnWidth * i, top: headerHeight * 0.5 - 1 }}
         >
           <div className={styles.calendarHeader_bottom_item_vertical_top}>{paddedDay}</div>
           <div className={styles.calendarHeader_bottom_item_sub}>{weekDay[1]}</div> 
         </div>  
       );
 
+      const topValue = getTopValueByDate(date, locale)
+
+      if (topWidthMap[topValue]) {
+        topWidthMap[topValue] += bottomWidth
+      } else {
+        topWidthMap[topValue] = bottomWidth
+      }
+
       // dayCount用于计算当前月有多少天
-      if(date.getMonth() === dates[i + 1]?.getMonth()) {
-        dayCount++
-      }
+      // if(date.getMonth() === dates[i + 1]?.getMonth()) {
+      //   dayCount++
+      // }
 
-      if (
-        (
-        date.getMonth() !== dates[i + 1]?.getMonth())
-      ) {
-        const curMonth = getLocaleMonth(date, locale);
-        const curYear = getLocaleYear(date, locale)
-
-        const percent = (dayCount / date.getDate()) || 1
-        dayCount = 1
-        topValues.push(
-          <TopPartOfCalendar
-            key={curMonth + date.getFullYear()}
-            value={curYear + curMonth}
-            width={getMonthColumnWidth(viewMode, date) * percent}
-          />
-        );
-      }
     }
-    return [topValues, bottomValues];
+
+    return [getTopValuesByMap(topWidthMap), bottomValues];
   };
 
   const getCalendarValuesForPartOfDay = () => {

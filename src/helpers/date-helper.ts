@@ -503,3 +503,10 @@ export const getDateIsActive = (date: Date, viewMode: ViewMode): boolean => {
     return +nowStartDate === +date
   }
 } 
+
+// 获取时间轴顶部标题（年月）
+export const getTopValueByDate = (date: Date, locale: string) => {
+  const curMonth = getLocaleMonth(date, locale)
+  const curYear = getLocaleYear(date, locale)
+  return curYear + curMonth
+}

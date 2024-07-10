@@ -3,11 +3,11 @@ import React, {
   SyntheticEvent,
   useRef,
   useEffect,
-  useMemo,
+  useMemo
 } from "react";
 import { ViewMode, GanttProps, Task } from "../../types/public-types";
 import { GridProps } from "../grid/grid";
-import { ganttDateRange, seedDates, getDateColumnWidthByViewMode } from "../../helpers/date-helper";
+import { ganttDateRange, seedDates, getDateColumnWidthByViewMode, addToDate } from "../../helpers/date-helper";
 import { CalendarProps } from "../calendar/calendar";
 import { TaskGanttContentProps } from "./task-gantt-content";
 import { TaskListHeaderDefault } from "../task-list/task-list-header";
@@ -27,6 +27,7 @@ import classnames from 'classnames'
 import { debounce } from '../../helpers'
 import styles from "./gantt.module.css";
 import '@kdcloudjs/kdesign/dist/kdesign.min.css'
+import useDebounce from "../../hooks/useDebounce";
 
 export const Gantt: React.FunctionComponent<GanttProps> = ({
   tasks,
@@ -39,7 +40,7 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
   rowCount = 1,
   ganttHeight = 0,
   viewMode = ViewMode.Day,
-  preStepsCount = 1,
+  preStepsCount: preStepsCountProp = 1, // 时间跨度预留数
   locale = "zh-CN",
   barFill = 60,
   barCornerRadius = 4,
@@ -53,7 +54,8 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
   projectBackgroundSelectedColor = "#f7bb53",
   milestoneBackgroundColor = "#f1c453",
   milestoneBackgroundSelectedColor = "#f29e4c",
-  rtl = false,
+  rtl = false, // right to left
+  infiniteScroll = true, // 无限滚动
   handleWidth = 8,
   timeStep = 300000,
   arrowColor = "grey",
@@ -72,9 +74,14 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
   onExpanderClick,
 }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const ganttRef = useRef<HTMLDivElement>(null);
   const taskListRef = useRef<HTMLDivElement>(null);
+  const ganttScrollRef = useRef<{ getScrollDom: () => HTMLDivElement, getStatus: () => boolean }>(null)
+  
+  const [preStepsCount, setPreStepsCount] = useState(preStepsCountProp)
+  const [afterStepsCount, setAfterStepsCount] = useState(1)
   const [dateSetup, setDateSetup] = useState<DateSetup>(() => {
-    const [startDate, endDate] = ganttDateRange(tasks, viewMode, preStepsCount);
+    const [startDate, endDate] = ganttDateRange(tasks, viewMode, preStepsCount, afterStepsCount);
     return { viewMode, dates: seedDates(startDate, endDate, viewMode) };
   });
   const [currentViewDate, setCurrentViewDate] = useState<Date | undefined>(
@@ -136,7 +143,11 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
   const [scrollY, setScrollY] = useState(0);
   const [scrollX, setScrollX] = useState(0);
   const [scrollTaskListX, setScrollTaskListX] = useState(0);
-  const [ignoreScrollEvent, setIgnoreScrollEvent] = useState(false);
+
+  useEffect(() => {
+    setPreStepsCount(1)
+    setAfterStepsCount(1)
+  }, [viewMode])
 
   // task change events
   useEffect(() => {
@@ -150,7 +161,8 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
     const [startDate, endDate] = ganttDateRange(
       filteredTasks,
       viewMode,
-      preStepsCount
+      preStepsCount,
+      afterStepsCount
     );
     let newDates = seedDates(startDate, endDate, viewMode);
     if (rtl) {
@@ -160,7 +172,6 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
       }
     }
     setDateSetup({ dates: newDates, viewMode });
-    // console.log('filteredTasks', filteredTasks)
     setBarTasks(
       convertToBarTasks(
         filteredTasks,
@@ -318,10 +329,59 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
     }
   }, [ganttHeight, tasks, headerHeight, rowHeight]);
 
-  // scroll events
   useEffect(() => {
-    const handleWheel = (event: WheelEvent) => {
+    const handleWrapperWheel = (event: WheelEvent) => {
+      if (event.shiftKey) return
+      // 滑轮滚动(上下滚动)
+      let newScrollY = scrollY + event.deltaY;
+      if (newScrollY < 0) {
+        newScrollY = 0;
+      } else if (newScrollY > ganttFullHeight) {
+        newScrollY = ganttFullHeight;
+      }
+      if (newScrollY !== scrollY) {
+        setScrollY(newScrollY);
+        event.preventDefault();
+      }
+    }
+    wrapperRef.current?.addEventListener("wheel", handleWrapperWheel, { passive: false })
+    return () => {
+      wrapperRef.current?.removeEventListener("wheel", handleWrapperWheel);
+    }
+  }, [wrapperRef, ganttFullHeight, scrollY, rtl])
+
+  useEffect(() => {
+    const handleListWheel = (event: WheelEvent) => {
       if (event.shiftKey || event.deltaX) {
+        const scrollMove = event.deltaX ? event.deltaX : event.deltaY;
+        let newScrollListX = scrollTaskListX + scrollMove;
+        if (newScrollListX < 0) {
+          newScrollListX = 0;
+        } else if (newScrollListX > taskWidth) {
+          newScrollListX = taskWidth;
+        }
+        setScrollTaskListX(newScrollListX);
+        event.preventDefault();
+      }
+    };
+    taskListRef.current?.addEventListener("wheel", handleListWheel, { passive: false })
+    return () => {
+      taskListRef.current?.removeEventListener("wheel", handleListWheel);
+    }
+  }, [taskListRef, scrollTaskListX, taskWidth, rtl])
+
+  useEffect(() => {
+    const ganttDom = ganttRef.current
+    const handleGanttWheel = (event: WheelEvent) => {
+      if (event.shiftKey || event.deltaX) {
+        if (infiniteScroll) {
+          if (scrollX === 0) {
+            setPreStepsCount(preStepsCount + 1)
+          }
+          if (judgeEdge()) {
+            setAfterStepsCount(afterStepsCount + 2)
+          }
+        }
         const scrollMove = event.deltaX ? event.deltaX : event.deltaY;
         let newScrollX = scrollX + scrollMove;
         if (newScrollX < 0) {
@@ -331,77 +391,45 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
         }
         setScrollX(newScrollX);
         event.preventDefault();
-      } else {
-        // 滑轮滚动
-        let newScrollY = scrollY + event.deltaY;
-        if (newScrollY < 0) {
-          newScrollY = 0;
-        } else if (newScrollY > ganttFullHeight) {
-          newScrollY = ganttFullHeight;
-        }
-        if (newScrollY !== scrollY) {
-          setScrollY(newScrollY);
-          event.preventDefault();
-        }
       }
-
-      setIgnoreScrollEvent(true);
     };
-
-    // subscribe if scroll is necessary
-    wrapperRef.current?.addEventListener("wheel", handleWheel, {
-      passive: false,
-    });
+    ganttDom?.addEventListener("wheel", handleGanttWheel, { passive: false });
     return () => {
-      wrapperRef.current?.removeEventListener("wheel", handleWheel);
-    };
-  }, [
-    wrapperRef,
-    scrollY,
-    scrollX,
-    ganttHeight,
-    svgWidth,
-    rtl,
-    ganttFullHeight,
-  ]);
+      ganttDom?.removeEventListener("wheel", handleGanttWheel);
+    }
+  }, [ganttRef, scrollX, svgWidth, rtl])
 
   const handleScrollY = (event: SyntheticEvent<HTMLDivElement>) => {
-    console.log('ignoreScrollEvent', ignoreScrollEvent)
     if (scrollY !== event.currentTarget.scrollTop) {
       setScrollY(event.currentTarget.scrollTop);
-      setIgnoreScrollEvent(true);
-    } else {
-      setIgnoreScrollEvent(false);
     }
   };
 
-  const handleScrollX = (event: SyntheticEvent<HTMLDivElement>) => {
-    // if (scrollX !== event.currentTarget.scrollLeft && !ignoreScrollEvent) {
-    //   setScrollX(event.currentTarget.scrollLeft);
-    //   setIgnoreScrollEvent(true);
-    // } else {
-    //   setIgnoreScrollEvent(false);
-    // }
-    if (scrollX !== event.currentTarget.scrollLeft) { 
-      setScrollX(event.currentTarget.scrollLeft); 
-      setIgnoreScrollEvent(true); 
-    } else { 
-      setIgnoreScrollEvent(false); 
+  const judgeEdge = () => {
+    const ganttDom = ganttScrollRef.current?.getScrollDom()
+    return ganttDom && ganttDom.scrollLeft + ganttDom.clientWidth >= ganttDom.scrollWidth
+  }
+
+  const handleScrollX = (e: SyntheticEvent<HTMLDivElement>) => {
+
+    const target = e.currentTarget || e.nativeEvent?.target
+    const scrollLeft = target.scrollLeft
+
+    if (infiniteScroll && judgeEdge()) {
+      setAfterStepsCount(afterStepsCount + 1)
+    }
+    if (infiniteScroll && scrollLeft/svgWidth < 0.2 && scrollLeft < scrollX) {
+      setPreStepsCount(preStepsCount + 1)
+      const newX = scrollLeft + getDateColumnWidthByViewMode(viewMode, addToDate(dateSetup.dates[0], -1, 'day')) 
+      setScrollX(newX > svgWidth ? svgWidth : newX)
+    } else if (scrollX !== scrollLeft) { 
+      setScrollX(scrollLeft)
     }
   };
 
   const handleScrollTaskListX = (event: SyntheticEvent<HTMLDivElement>) => {
-    // if (scrollX !== event.currentTarget.scrollLeft && !ignoreScrollEvent) {
-    //   setScrollX(event.currentTarget.scrollLeft);
-    //   setIgnoreScrollEvent(true);
-    // } else {
-    //   setIgnoreScrollEvent(false);
-    // }
     if (scrollTaskListX !== event.currentTarget.scrollLeft) { 
       setScrollTaskListX(event.currentTarget.scrollLeft); 
-      setIgnoreScrollEvent(true); 
-    } else { 
-      setIgnoreScrollEvent(false); 
     }
   };
 
@@ -448,7 +476,6 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
       }
       setScrollY(newScrollY);
     }
-    setIgnoreScrollEvent(true);
   };
 
   /**
@@ -568,6 +595,8 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
         /> */}
         {listCellWidth && <TaskList {...tableProps} />} 
         <TaskGantt
+        // @ts-ignore
+          ref={ganttRef}
           gridProps={gridProps}
           calendarProps={calendarProps}
           barProps={barProps}
@@ -603,11 +632,13 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
         />
       </div>
       <HorizontalScroll
+      // @ts-ignore
+        ref={ganttScrollRef}
         scrollWidth={svgWidth}
         offsetWidth={taskListWidth}
         scroll={scrollX}
         rtl={rtl}
-        onScroll={handleScrollX}
+        onScroll={useDebounce(handleScrollX, 20)}
       />
       <HorizontalScroll
         scrollWidth={taskWidth}

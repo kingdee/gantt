@@ -70,12 +70,13 @@ export const startOfDate = (date: Date, scale: DateHelperScales) => {
   );
   return newDate;
 };
-
+ 
 // 获取甘特图时间范围
 export const ganttDateRange = (
   tasks: Task[],
   viewMode: ViewMode,
-  preStepsCount: number
+  preStepsCount: number,
+  afterStepsCount: number
 ) => {
   let firstExistTime
 
@@ -135,25 +136,25 @@ export const ganttDateRange = (
   }
 
   // console.log('newEndDate start', newStartDate, newEndDate)
-  
+
   switch (viewMode) {
     case ViewMode.Year:
-      newStartDate = addToDate(newStartDate, -1, "year");
+      newStartDate = addToDate(newStartDate, -1 * preStepsCount, "year");
       newStartDate = startOfDate(newStartDate, "year");
-      newEndDate = addToDate(newEndDate, 1, "year");
+      newEndDate = addToDate(newEndDate, afterStepsCount, "year");
       newEndDate = startOfDate(newEndDate, "year");
       break;
     case ViewMode.QuarterYear:
-      newStartDate = addToDate(newStartDate, -3, "month");
+      newStartDate = addToDate(newStartDate, -3 * preStepsCount, "month");
       newStartDate = startOfDate(newStartDate, "month");
-      newEndDate = addToDate(newEndDate, 3, "month");
+      newEndDate = addToDate(newEndDate, 3 * afterStepsCount, "month");
       newEndDate = startOfDate(newEndDate, "month");
       break;
     case ViewMode.Month:
       newStartDate = addToDate(newStartDate, -1 * preStepsCount, "month");
       newStartDate = startOfDate(newStartDate, "month");
-      newEndDate = addToDate(newEndDate, 1, "year");
-      newEndDate = startOfDate(newEndDate, "year");
+      newEndDate = addToDate(newEndDate, afterStepsCount, 'month');
+      // newEndDate = startOfDate(newEndDate, "year");
       break;
     case ViewMode.Week:
       newStartDate = startOfDate(newStartDate, "day");
@@ -163,7 +164,7 @@ export const ganttDateRange = (
         "day"
       );
       newEndDate = startOfDate(newEndDate, "day");
-      newEndDate = addToDate(newEndDate, 1.5, "month");
+      newEndDate = addToDate(newEndDate, afterStepsCount, "month");
       break;
     case ViewMode.Day:
       // 前后渲染满一个月
@@ -173,7 +174,9 @@ export const ganttDateRange = (
       // 用当前月份多少天，减去结束日期当天。用于渲染当月后续不足的天数
       // const startApartDay = startDaysInMonth - startDataDay
       newStartDate = startOfDate(newStartDate, "day");
-      newStartDate = addToDate(newStartDate, -1 * (startDataDay === 1 ? startDataDay : startDataDay - 1), "day");
+      const defaultStartDay = startDataDay === 1 ? startDataDay : startDataDay - 1
+      const handlePreSteps = preStepsCount === 1 ? 0 : preStepsCount // 忽略默认值1，初始不预留
+      newStartDate = addToDate(newStartDate, -1 * (defaultStartDay + handlePreSteps), "day");
 
       const endDaysInMonth = getDaysInMonth(newEndDate.getMonth(), newEndDate.getFullYear())
       const newEndDay = newEndDate.getDate()
@@ -181,7 +184,9 @@ export const ganttDateRange = (
       const endApartDay = endDaysInMonth - newEndDay
 
       newEndDate = startOfDate(newEndDate, "day");
-      newEndDate = addToDate(newEndDate, endApartDay === 0 ? endApartDay + 1 : endApartDay, "day");
+      const defaultAddDay = endApartDay === 0 ? endApartDay + 1 : endApartDay
+      const handleAfterSteps = afterStepsCount === 1 ? 0 : afterStepsCount // 忽略默认值1，初始不预留
+      newEndDate = addToDate(newEndDate, defaultAddDay + handleAfterSteps, "day");
 
       // console.log('newEndDate2', newStartDate, newEndDate)
       break;

@@ -104,6 +104,7 @@ export interface DisplayOption {
    */
   locale?: string;
   rtl?: boolean;
+  infiniteScroll?: boolean;
 }
 
 export interface StylingOption {

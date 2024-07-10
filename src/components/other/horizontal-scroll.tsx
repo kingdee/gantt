@@ -6,7 +6,7 @@
  * @FilePath: \gantt-task-react\src\components\other\horizontal-scroll.tsx
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
-import React, { SyntheticEvent, useRef, useEffect } from "react";
+import React, { SyntheticEvent, forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import styles from "./horizontal-scroll.module.css";
 
 export const HorizontalScroll: React.FC<{
@@ -16,14 +16,25 @@ export const HorizontalScroll: React.FC<{
   rtl: boolean;
   style?: object;
   onScroll: (event: SyntheticEvent<HTMLDivElement>) => void;
-}> = ({ scroll, scrollWidth, offsetWidth, rtl, style = {}, onScroll }) => {
-  const scrollRef = useRef<HTMLDivElement>(null);
+}> = forwardRef(({ scroll, scrollWidth, offsetWidth, rtl, style = {}, onScroll }, ref) => {
+
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  useImperativeHandle(ref, () => {
+    return {
+      getScrollDom () {
+        return scrollRef.current
+      }
+    }
+  }, [scrollRef])
 
   useEffect(() => {
-    if (scrollRef.current) {
+    // @ts-ignore
+    if (scrollRef.current && scrollRef.current.scrollLeft !== scroll) {
+      // @ts-ignore
       scrollRef.current.scrollLeft = scroll;
     }
-  }, [scroll]);
+  }); // 不加依赖是因为篡改scrollLeft在左触底时会失效，需要强刷
 
   return (
     <div
@@ -36,9 +47,12 @@ export const HorizontalScroll: React.FC<{
       }}
       className={styles.scrollWrapper}
       onScroll={onScroll}
+      // @ts-ignore
       ref={scrollRef}
     >
       <div style={{ width: scrollWidth }} className={styles.scroll} />
     </div>
   );
-};
+});
+
+HorizontalScroll.displayName = 'HorizontalScroll'

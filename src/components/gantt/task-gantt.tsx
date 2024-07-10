@@ -7,7 +7,8 @@
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 import React, { 
-  useRef, useEffect, 
+  useRef, useEffect,
+  forwardRef, 
   // useMemo 
 } from "react";
 import { GridProps, Grid, GridToday } from "../grid/grid";
@@ -24,7 +25,7 @@ export type TaskGanttProps = {
   scrollX: number;
   ganttFullHeight: number;
 };
-export const TaskGantt: React.FC<TaskGanttProps> = ({
+export const TaskGantt = forwardRef<HTMLDivElement, TaskGanttProps>(({
   gridProps,
   calendarProps,
   barProps,
@@ -32,10 +33,10 @@ export const TaskGantt: React.FC<TaskGanttProps> = ({
   scrollY,
   scrollX,
   ganttFullHeight
-}) => {
+}, ref) => {
   const ganttSVGRef = useRef<SVGSVGElement>(null);
   const horizontalContainerRef = useRef<HTMLDivElement>(null);
-  const verticalGanttContainerRef = useRef<HTMLDivElement>(null);
+  const verticalGanttContainerRef = ref || useRef<HTMLDivElement>(null);
   const newBarProps = { ...barProps, svg: ganttSVGRef };
 
   useEffect(() => {
@@ -45,7 +46,9 @@ export const TaskGantt: React.FC<TaskGanttProps> = ({
   }, [scrollY]);
 
   useEffect(() => {
-    if (verticalGanttContainerRef.current) {
+    // @ts-ignore
+    if (verticalGanttContainerRef?.current) {
+    // @ts-ignore
       verticalGanttContainerRef.current.scrollLeft = scrollX;
     }
   }, [scrollX]);
@@ -97,4 +100,4 @@ export const TaskGantt: React.FC<TaskGanttProps> = ({
       </div>
     </div>
   );
-};
+});

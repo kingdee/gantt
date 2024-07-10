@@ -36,6 +36,12 @@ export const HorizontalScroll: React.FC<{
     }
   }); // 不加依赖是因为篡改scrollLeft在左触底时会失效，需要强刷
 
+  const handleScroll = (e: SyntheticEvent<HTMLDivElement>) => {
+    // 处理父级加防抖event被清除报错
+    e.persist()
+    onScroll?.(e)
+  }
+
   return (
     <div
       dir="ltr"
@@ -46,7 +52,7 @@ export const HorizontalScroll: React.FC<{
         ...style
       }}
       className={styles.scrollWrapper}
-      onScroll={onScroll}
+      onScroll={handleScroll}
       // @ts-ignore
       ref={scrollRef}
     >

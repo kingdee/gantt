@@ -199,6 +199,7 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
     tasks,
     viewMode,
     preStepsCount,
+    afterStepsCount,
     rowHeight,
     barCornerRadius,
     columnWidth,
@@ -414,7 +415,6 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
 
     const target = e.currentTarget || e.nativeEvent?.target
     const scrollLeft = target.scrollLeft
-
     if (infiniteScroll && judgeEdge()) {
       setAfterStepsCount(afterStepsCount + 1)
     }
@@ -426,6 +426,8 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
       setScrollX(scrollLeft)
     }
   };
+
+  const deScrollGanttX = useDebounce(handleScrollX, 20)
 
   const handleScrollTaskListX = (event: SyntheticEvent<HTMLDivElement>) => {
     if (scrollTaskListX !== event.currentTarget.scrollLeft) { 
@@ -638,7 +640,7 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
         offsetWidth={taskListWidth}
         scroll={scrollX}
         rtl={rtl}
-        onScroll={useDebounce(handleScrollX, 20)}
+        onScroll={deScrollGanttX}
       />
       <HorizontalScroll
         scrollWidth={taskWidth}
@@ -651,3 +653,5 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
     </div>
   );
 };
+
+Gantt.displayName = 'Gantt'

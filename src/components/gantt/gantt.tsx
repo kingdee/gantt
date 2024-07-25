@@ -73,9 +73,10 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
   onSelect,
   onExpanderClick,
 }) => {
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const ganttRef = useRef<HTMLDivElement>(null);
-  const taskListRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const ganttRef = useRef<HTMLDivElement>(null)
+  const ganttSvgRef = useRef<HTMLDivElement>(null)
+  const taskListRef = useRef<HTMLDivElement>(null)
   const ganttScrollRef = useRef<{ getScrollDom: () => HTMLDivElement, getStatus: () => boolean }>(null)
   
   const [preStepsCount, setPreStepsCount] = useState(preStepsCountProp)
@@ -335,10 +336,12 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
       if (event.shiftKey) return
       // 滑轮滚动(上下滚动)
       let newScrollY = scrollY + event.deltaY;
+      const ganttSvgWrapper = ganttSvgRef?.current
+      // 处理边界
       if (newScrollY < 0) {
         newScrollY = 0;
-      } else if (newScrollY > ganttFullHeight) {
-        newScrollY = ganttFullHeight;
+      } else if (ganttSvgWrapper && newScrollY + ganttSvgWrapper.clientHeight > ganttFullHeight) {
+        newScrollY = ganttFullHeight - ganttSvgWrapper.clientHeight;
       }
       if (newScrollY !== scrollY) {
         setScrollY(newScrollY);
@@ -597,8 +600,8 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
         /> */}
         {listCellWidth && <TaskList {...tableProps} />} 
         <TaskGantt
-        // @ts-ignore
           ref={ganttRef}
+          svgWrapperRef={ganttSvgRef}
           gridProps={gridProps}
           calendarProps={calendarProps}
           barProps={barProps}

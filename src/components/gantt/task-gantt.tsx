@@ -24,6 +24,7 @@ export type TaskGanttProps = {
   scrollY: number;
   scrollX: number;
   ganttFullHeight: number;
+  svgWrapperRef: React.RefObject<HTMLDivElement>
 };
 export const TaskGantt = forwardRef<HTMLDivElement, TaskGanttProps>(({
   gridProps,
@@ -32,10 +33,11 @@ export const TaskGantt = forwardRef<HTMLDivElement, TaskGanttProps>(({
   ganttHeight,
   scrollY,
   scrollX,
-  ganttFullHeight
-}, ref) => {
+  ganttFullHeight,
+  svgWrapperRef
+}, ref: React.ForwardedRef<HTMLDivElement>) => {
   const ganttSVGRef = useRef<SVGSVGElement>(null);
-  const horizontalContainerRef = useRef<HTMLDivElement>(null);
+  const horizontalContainerRef = svgWrapperRef || useRef<HTMLDivElement>(null);
   const verticalGanttContainerRef = ref || useRef<HTMLDivElement>(null);
   const newBarProps = { ...barProps, svg: ganttSVGRef };
 

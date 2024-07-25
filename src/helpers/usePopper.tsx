@@ -541,7 +541,7 @@ function usePopper(locatorElement: React.ReactElement, popperElement: React.Reac
   useEffect(() => {
     if (visible) {
       const scrollAlign = debounce((e: Event) => {
-        const isPopperScroll = e.target === popperRef.current || popperRef.current.contains(e.target)
+        const isPopperScroll = e.target === popperRef.current || popperRef.current?.contains(e.target)
         if (scrollHidden && !isPopperScroll) {
           props.visible === undefined && setVisible(false)
           onVisibleChange && onVisibleChange(false)

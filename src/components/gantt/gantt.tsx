@@ -26,7 +26,7 @@ import classnames from 'classnames'
 // import { SplitPanel } from '@kdcloudjs/kdesign'
 import { debounce } from '../../helpers'
 import styles from "./gantt.module.css";
-import '@kdcloudjs/kdesign/dist/kdesign.min.css'
+// import '@kdcloudjs/kdesign/dist/kdesign.min.css'
 import useDebounce from "../../hooks/useDebounce";
 
 export const Gantt: React.FunctionComponent<GanttProps> = ({

@@ -65,8 +65,8 @@ export const TaskList: React.FC<TaskListProps> = ({
 }) => {
   const horizontalContainerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (taskListRef.current) {
-      taskListRef.current.scrollTop = scrollY;
+    if (horizontalContainerRef.current) {
+      horizontalContainerRef.current.scrollTop = scrollY;
     }
   }, [scrollY]);
 
@@ -102,7 +102,8 @@ export const TaskList: React.FC<TaskListProps> = ({
       <div
         ref={horizontalContainerRef}
         className={horizontalContainerClass}
-        style={{ height: ganttHeight ? ganttHeight : 'auto', top: headerHeight }}
+        // 为兼容ie（不支持sticky），内容往下铺开
+        style={{ width: 'fit-content', height: ganttHeight ? ganttHeight : `calc(100% - ${headerHeight}px)`, top: headerHeight }}
       >
         {/* <div> */}
           <TaskListTable {...tableProps} />

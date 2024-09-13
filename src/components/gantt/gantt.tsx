@@ -28,6 +28,7 @@ import { debounce } from '../../helpers'
 import styles from "./gantt.module.css";
 // import '@kdcloudjs/kdesign/dist/kdesign.min.css'
 import useDebounce from "../../hooks/useDebounce";
+import { setLangMap } from "../../helpers/i18-helper";
 
 export const Gantt: React.FunctionComponent<GanttProps> = ({
   tasks,
@@ -42,6 +43,7 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
   viewMode = ViewMode.Day,
   preStepsCount: preStepsCountProp = 1, // 时间跨度预留数
   locale = "zh-CN",
+  localeMap = {},
   barFill = 60,
   barCornerRadius = 4,
   barProgressColor = "#a3a3ff",
@@ -144,6 +146,10 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
   const [scrollY, setScrollY] = useState(0);
   const [scrollX, setScrollX] = useState(0);
   const [scrollTaskListX, setScrollTaskListX] = useState(0);
+
+  useEffect(() => {
+    setLangMap(localeMap)
+  }, [locale, localeMap])
 
   useEffect(() => {
     setPreStepsCount(1)

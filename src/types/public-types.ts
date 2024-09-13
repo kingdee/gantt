@@ -95,6 +95,11 @@ export interface EventOption {
   onExpanderClick?: (task: Task) => void;
 }
 
+export type LocaleMap = {
+  tooltipSum?: string;
+  week?: string
+}
+
 export interface DisplayOption {
   viewMode?: ViewMode;
   viewDate?: Date;
@@ -102,7 +107,8 @@ export interface DisplayOption {
   /**
    * Specifies the month name language. Able formats: ISO 639-2, Java Locale
    */
-  locale?: string;
+  locale?: string; // 国际化语种
+  localeMap?: LocaleMap; // 国际化词条
   rtl?: boolean;
   infiniteScroll?: boolean;
 }

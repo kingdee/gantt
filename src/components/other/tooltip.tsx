@@ -8,6 +8,7 @@ import DropDownPanel from './dropdown-panel'
 // import { Tooltip as BaseTooltip } from '@kdcloudjs/kdesign'
 
 import styles from "./tooltip.module.css";
+import { translation } from "../../helpers/i18-helper";
 
 export type TooltipProps = {
   task: BarTask;
@@ -90,7 +91,7 @@ export const StandardTooltipContent: React.FC<{
                 style={{ background: itemStyles?.backgroundColor }}
               ></div>
               <div className={styles.tooltipDefaultContainer_item_name}>{name}：{start ? formatDate(start) : ''}-{end ? formatDate(end) : ''}</div>
-              <div>共{getDaysBetweenDates(end, start)}天</div>
+              <div>{translation('tooltipSum', { num: getDaysBetweenDates(end, start) })}</div>
             </div>
           )
         })

@@ -16,6 +16,7 @@ import {
 import { DateSetup } from "../../types/date-setup";
 import classnames from 'classnames'
 import styles from "./calendar.module.css";
+import { translation } from "../../helpers/i18-helper";
 
 export type CalendarProps = {
   dateSetup: DateSetup;
@@ -170,7 +171,7 @@ export const Calendar: React.FC<CalendarProps> = ({
         topValue = `${getLocaleYear(date, locale)}${getLocaleMonth(date, locale)}`;
       }
       // bottom
-      const bottomValue = `${getWeekNumberISO8601(date)}周`;
+      const bottomValue = `${getWeekNumberISO8601(date)}${translation('week')}`;
 
       const isActive = getDateIsActive(date, viewMode)
 

@@ -6,7 +6,7 @@
 }
 
 .taskListTableRow {
-  display: table-row;
+  /* display: table-row; */
   text-overflow: ellipsis;
   width: 100%;
 }

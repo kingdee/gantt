@@ -114,7 +114,7 @@ export const TaskListTableDefault: React.FC<{
         // }
 
         const taskItemsCount = t.taskItems?.length || 1
-
+        const rowHeight = calcRowTaskHeight(20, taskItemsCount, 12, 12)
         return (
           <div
             className={styles.taskListTableRow}
@@ -141,6 +141,7 @@ export const TaskListTableDefault: React.FC<{
                     })}
                     style={{
                       width: width || defaultColumnWidth,
+                      height: rowHeight,
                       maxWidth: width || defaultColumnWidth,
                       minWidth: width || defaultColumnWidth,
                       textAlign: align || 'left',
